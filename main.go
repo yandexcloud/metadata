@@ -17,7 +17,7 @@ const metadataURL = "http://169.254.169.254"
 const gcpURL = metadataURL + "/computeMetadata/v1/instance/"
 const awsURL = metadataURL + "/latest/meta-data/"
 
-var envrgx = regexp.MustCompile(`^([\w-_/]+),([\w-_/]+),([\d]{4})$`)
+var envrgx = regexp.MustCompile(`^([\w-_/]+),([\w-_/\.]+),([\d]{4})$`)
 
 var INF = log.New(os.Stdout, "metadata [INF] ", 0)
 var ERR = log.New(os.Stdout, "metadata [ERR] ", 0)
