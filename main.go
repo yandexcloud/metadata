@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 	"strings"
 	"time"
 )
+
+const cfgPath = "/run/config"
 
 const metadataURL = "http://169.254.169.254"
 
@@ -53,6 +56,11 @@ var gcpAttributes = []attribute{
 		mode: 0644,
 	},
 	{
+		key:  "name",
+		file: "local_hostname",
+		mode: 0644,
+	},
+	{
 		key:  "attributes/ssh-keys",
 		file: "ssh/authorized_keys",
 		mode: 0600,
@@ -83,11 +91,6 @@ var awsAttributes = []attribute{
 	{
 		key:  "public-ipv4",
 		file: "public_ipv4",
-		mode: 0644,
-	},
-	{
-		key:  "local-hostname",
-		file: "local_hostname",
 		mode: 0644,
 	},
 }
@@ -174,6 +177,16 @@ func fromEnv(prefix string) []attribute {
 }
 
 func main() {
+	if err := os.MkdirAll(cfgPath, 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "unable to create config dir %s: %v\n", cfgPath, err)
+		os.Exit(1)
+	}
+
+	if err := os.Chdir(cfgPath); err != nil {
+		fmt.Fprintf(os.Stderr, "unable to change current dir %s: %v\n", cfgPath, err)
+		os.Exit(1)
+	}
+
 	gcpAttributes = append(gcpAttributes, fromEnv("GCP_")...)
 	for _, a := range gcpAttributes {
 		gcpGet(a.key, a.file, a.mode)
